@@ -1,4 +1,4 @@
-package ni.edu.uam.gestionproductos.producto;
+package ni.edu.uam.gestionproductos.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,15 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 
-import ni.edu.uam.gestionproductos.categoria.Categoria;
-import ni.edu.uam.gestionproductos.proveedor.Proveedor;
-
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "producto")
@@ -42,9 +43,17 @@ public class Producto {
     @DecimalMin("0.0")
     private BigDecimal precioVenta;
 
-    private int existencia;
+    private Integer existencia;
 
     private String descripcion;
+
+    @ManyToMany
+    @JoinTable(
+            name = "producto_etiqueta",
+            joinColumns = @JoinColumn(name = "producto_id"),
+            inverseJoinColumns = @JoinColumn(name = "etiqueta_id")
+    )
+    private Set<Etiqueta> etiquetas = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -94,11 +103,11 @@ public class Producto {
         this.precioVenta = precioVenta;
     }
 
-    public int getExistencia() {
+    public Integer getExistencia() {
         return existencia;
     }
 
-    public void setExistencia(int existencia) {
+    public void setExistencia(Integer existencia) {
         this.existencia = existencia;
     }
 
@@ -108,5 +117,13 @@ public class Producto {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public Set<Etiqueta> getEtiquetas() {
+        return etiquetas;
+    }
+
+    public void setEtiquetas(Set<Etiqueta> etiquetas) {
+        this.etiquetas = etiquetas;
     }
 }

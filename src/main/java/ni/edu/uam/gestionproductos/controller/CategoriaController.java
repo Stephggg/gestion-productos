@@ -1,6 +1,8 @@
-package ni.edu.uam.gestionproductos.categoria;
+package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.entity.Categoria;
+import ni.edu.uam.gestionproductos.repository.CategoriaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,9 @@ public class CategoriaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Categoria> buscar(@PathVariable Integer id) {
-        return repository.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -39,7 +43,9 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> actualizar(@PathVariable Integer id, @Valid @RequestBody Categoria datos) {
+    public ResponseEntity<Categoria> actualizar(
+            @PathVariable Integer id,
+            @Valid @RequestBody Categoria datos) {
         return repository.findById(id).map(categoria -> {
             categoria.setNombre(datos.getNombre());
             categoria.setActiva(datos.isActiva());

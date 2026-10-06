@@ -1,6 +1,8 @@
-package ni.edu.uam.gestionproductos.proveedor;
+package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.entity.Proveedor;
+import ni.edu.uam.gestionproductos.repository.ProveedorRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,9 @@ public class ProveedorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Proveedor> buscar(@PathVariable Integer id) {
-        return repository.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -39,7 +43,9 @@ public class ProveedorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> actualizar(@PathVariable Integer id, @Valid @RequestBody Proveedor datos) {
+    public ResponseEntity<Proveedor> actualizar(
+            @PathVariable Integer id,
+            @Valid @RequestBody Proveedor datos) {
         return repository.findById(id).map(proveedor -> {
             proveedor.setNombre(datos.getNombre());
             proveedor.setTelefono(datos.getTelefono());

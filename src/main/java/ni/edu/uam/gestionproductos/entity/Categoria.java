@@ -1,4 +1,4 @@
-package ni.edu.uam.gestionproductos.proveedor;
+package ni.edu.uam.gestionproductos.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
@@ -7,17 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
-import ni.edu.uam.gestionproductos.producto.Producto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "proveedor")
-public class Proveedor {
+@Table(name = "categoria")
+public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +23,10 @@ public class Proveedor {
     @NotBlank
     private String nombre;
 
-    private String telefono;
-
-    @Email
-    private String correo;
-
-    private boolean activo = true;
+    private boolean activa = true;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "proveedor")
+    @OneToMany(mappedBy = "categoria")
     private List<Producto> productos = new ArrayList<>();
 
     public Integer getId() {
@@ -53,28 +45,12 @@ public class Proveedor {
         this.nombre = nombre;
     }
 
-    public String getTelefono() {
-        return telefono;
+    public boolean isActiva() {
+        return activa;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setActiva(boolean activa) {
+        this.activa = activa;
     }
 
     public List<Producto> getProductos() {
