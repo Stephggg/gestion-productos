@@ -3,7 +3,7 @@
 ## Estructura
 
 - `controller`: controladores REST de categorias, productos, proveedores y etiquetas.
-- `dto`: `ProductoRequestDTO` para registrar y actualizar productos mediante ids.
+- `dto`: DTOs Request/Response para categorias, productos, proveedores y etiquetas.
 - `entity`: entidades JPA `Categoria`, `Producto`, `Proveedor` y `Etiqueta`.
 - `repository`: interfaces `JpaRepository` y consultas por categoria/etiqueta.
 - `service`: logica de negocio de productos y asociaciones de etiquetas.
@@ -114,6 +114,8 @@ Producto mediante `ProductoRequestDTO`:
 }
 ```
 
+Las respuestas de la API usan DTOs y no exponen directamente las entidades JPA. Un producto responde con `categoriaId`, `categoriaNombre`, `proveedorId`, `proveedorNombre` y una lista resumida de etiquetas.
+
 Etiqueta:
 
 ```json
@@ -124,7 +126,7 @@ Etiqueta:
 
 Crear las etiquetas `Oferta`, `Importado`, `Empresarial`, `Portatil` y `Gaming`. Para asociar una etiqueta existente a un producto se usa `POST /api/productos/1/etiquetas/1` sin body. Para quitar solo la asociacion se usa `DELETE` en la misma URL.
 
-Las entidades inversas usan `@JsonIgnore` en sus listas de productos. Asi el producto incluye categoria y proveedor sin producir una referencia circular al serializar JSON.
+Los DTOs evitan ciclos JSON y ocultan las colecciones inversas de las entidades JPA.
 
 ## Respuestas de comprobacion
 
@@ -143,7 +145,7 @@ Las entidades inversas usan `@JsonIgnore` en sus listas de productos. Asi el pro
 
 1. Una clase Service concentra la logica de negocio y coordina repositorios y validaciones.
 2. El controlador debe manejar HTTP; separar la logica facilita pruebas, mantenimiento y reutilizacion.
-3. Un DTO es un objeto para transportar los datos de una peticion sin exponer directamente la entidad.
+3. Un DTO es un objeto para transportar los datos de una peticion o respuesta sin exponer directamente la entidad.
 4. La entidad JPA representa el modelo persistente; el DTO representa el contrato de entrada o salida de la API.
 5. Recibir `categoriaId` evita que el cliente envie una entidad completa y permite validar la categoria en el Service.
 6. `@OneToMany` representa una categoria con muchos productos y `@ManyToOne` muchos productos para una categoria.
@@ -159,6 +161,7 @@ Las entidades inversas usan `@JsonIgnore` en sus listas de productos. Asi el pro
 - Configuracion de `application.properties`.
 - Arbol de paquetes bajo `src/main/java`.
 - Entidades y anotaciones JPA.
+- DTOs Request/Response de todas las entidades.
 - Diagrama de relaciones incluido arriba.
 - Archivos V1, V2, V3 y V4.
 - Capturas de GET, POST, PUT y DELETE de productos en Postman.

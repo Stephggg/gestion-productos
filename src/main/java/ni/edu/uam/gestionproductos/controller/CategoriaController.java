@@ -1,6 +1,9 @@
 package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.dto.CategoriaRequestDTO;
+import ni.edu.uam.gestionproductos.dto.CategoriaResponseDTO;
+import ni.edu.uam.gestionproductos.dto.DtoMapper;
 import ni.edu.uam.gestionproductos.entity.Categoria;
 import ni.edu.uam.gestionproductos.repository.CategoriaRepository;
 import org.springframework.http.ResponseEntity;
@@ -26,30 +29,36 @@ public class CategoriaController {
     }
 
     @GetMapping
-    public List<Categoria> listar() {
-        return repository.findAll();
+    public List<CategoriaResponseDTO> listar() {
+        return repository.findAll().stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Categoria> buscar(@PathVariable Integer id) {
+    public ResponseEntity<CategoriaResponseDTO> buscar(@PathVariable Integer id) {
         return repository.findById(id)
+                .map(DtoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Categoria guardar(@Valid @RequestBody Categoria categoria) {
-        return repository.save(categoria);
+    public CategoriaResponseDTO guardar(@Valid @RequestBody CategoriaRequestDTO datos) {
+        Categoria categoria = new Categoria();
+        categoria.setNombre(datos.getNombre());
+        categoria.setActiva(datos.isActiva());
+        return DtoMapper.toResponse(repository.save(categoria));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> actualizar(
+    public ResponseEntity<CategoriaResponseDTO> actualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody Categoria datos) {
+            @Valid @RequestBody CategoriaRequestDTO datos) {
         return repository.findById(id).map(categoria -> {
             categoria.setNombre(datos.getNombre());
             categoria.setActiva(datos.isActiva());
-            return ResponseEntity.ok(repository.save(categoria));
+            return ResponseEntity.ok(DtoMapper.toResponse(repository.save(categoria)));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

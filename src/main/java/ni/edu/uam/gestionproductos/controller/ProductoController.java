@@ -1,7 +1,9 @@
 package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.dto.DtoMapper;
 import ni.edu.uam.gestionproductos.dto.ProductoRequestDTO;
+import ni.edu.uam.gestionproductos.dto.ProductoResponseDTO;
 import ni.edu.uam.gestionproductos.entity.Producto;
 import ni.edu.uam.gestionproductos.service.ProductoService;
 import org.springframework.http.ResponseEntity;
@@ -27,35 +29,41 @@ public class ProductoController {
     }
 
     @GetMapping
-    public List<Producto> listar() {
-        return productoService.listar();
+    public List<ProductoResponseDTO> listar() {
+        return productoService.listar().stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/categoria/{categoriaId}")
-    public List<Producto> listarPorCategoria(@PathVariable Integer categoriaId) {
-        return productoService.listarPorCategoria(categoriaId);
+    public List<ProductoResponseDTO> listarPorCategoria(@PathVariable Integer categoriaId) {
+        return productoService.listarPorCategoria(categoriaId).stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/etiqueta/{etiquetaId}")
-    public List<Producto> listarPorEtiqueta(@PathVariable Integer etiquetaId) {
-        return productoService.listarPorEtiqueta(etiquetaId);
+    public List<ProductoResponseDTO> listarPorEtiqueta(@PathVariable Integer etiquetaId) {
+        return productoService.listarPorEtiqueta(etiquetaId).stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Producto buscar(@PathVariable Integer id) {
-        return productoService.buscarPorId(id);
+    public ProductoResponseDTO buscar(@PathVariable Integer id) {
+        return DtoMapper.toResponse(productoService.buscarPorId(id));
     }
 
     @PostMapping
-    public Producto guardar(@Valid @RequestBody ProductoRequestDTO dto) {
-        return productoService.guardar(dto);
+    public ProductoResponseDTO guardar(@Valid @RequestBody ProductoRequestDTO dto) {
+        return DtoMapper.toResponse(productoService.guardar(dto));
     }
 
     @PutMapping("/{id}")
-    public Producto actualizar(
+    public ProductoResponseDTO actualizar(
             @PathVariable Integer id,
             @Valid @RequestBody ProductoRequestDTO dto) {
-        return productoService.actualizar(id, dto);
+        return DtoMapper.toResponse(productoService.actualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
@@ -65,10 +73,10 @@ public class ProductoController {
     }
 
     @PostMapping("/{productoId}/etiquetas/{etiquetaId}")
-    public Producto agregarEtiqueta(
+    public ProductoResponseDTO agregarEtiqueta(
             @PathVariable Integer productoId,
             @PathVariable Integer etiquetaId) {
-        return productoService.agregarEtiqueta(productoId, etiquetaId);
+        return DtoMapper.toResponse(productoService.agregarEtiqueta(productoId, etiquetaId));
     }
 
     @DeleteMapping("/{productoId}/etiquetas/{etiquetaId}")

@@ -1,6 +1,9 @@
 package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.dto.DtoMapper;
+import ni.edu.uam.gestionproductos.dto.EtiquetaRequestDTO;
+import ni.edu.uam.gestionproductos.dto.EtiquetaResponseDTO;
 import ni.edu.uam.gestionproductos.entity.Etiqueta;
 import ni.edu.uam.gestionproductos.repository.EtiquetaRepository;
 import org.springframework.http.ResponseEntity;
@@ -25,20 +28,25 @@ public class EtiquetaController {
     }
 
     @GetMapping
-    public List<Etiqueta> listar() {
-        return repository.findAll();
+    public List<EtiquetaResponseDTO> listar() {
+        return repository.findAll().stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Etiqueta> buscar(@PathVariable Integer id) {
+    public ResponseEntity<EtiquetaResponseDTO> buscar(@PathVariable Integer id) {
         return repository.findById(id)
+                .map(DtoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Etiqueta guardar(@Valid @RequestBody Etiqueta etiqueta) {
-        return repository.save(etiqueta);
+    public EtiquetaResponseDTO guardar(@Valid @RequestBody EtiquetaRequestDTO datos) {
+        Etiqueta etiqueta = new Etiqueta();
+        etiqueta.setNombre(datos.getNombre());
+        return DtoMapper.toResponse(repository.save(etiqueta));
     }
 
     @DeleteMapping("/{id}")

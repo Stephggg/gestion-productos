@@ -1,6 +1,9 @@
 package ni.edu.uam.gestionproductos.controller;
 
 import jakarta.validation.Valid;
+import ni.edu.uam.gestionproductos.dto.DtoMapper;
+import ni.edu.uam.gestionproductos.dto.ProveedorRequestDTO;
+import ni.edu.uam.gestionproductos.dto.ProveedorResponseDTO;
 import ni.edu.uam.gestionproductos.entity.Proveedor;
 import ni.edu.uam.gestionproductos.repository.ProveedorRepository;
 import org.springframework.http.ResponseEntity;
@@ -26,32 +29,34 @@ public class ProveedorController {
     }
 
     @GetMapping
-    public List<Proveedor> listar() {
-        return repository.findAll();
+    public List<ProveedorResponseDTO> listar() {
+        return repository.findAll().stream()
+                .map(DtoMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Proveedor> buscar(@PathVariable Integer id) {
+    public ResponseEntity<ProveedorResponseDTO> buscar(@PathVariable Integer id) {
         return repository.findById(id)
+                .map(DtoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Proveedor guardar(@Valid @RequestBody Proveedor proveedor) {
-        return repository.save(proveedor);
+    public ProveedorResponseDTO guardar(@Valid @RequestBody ProveedorRequestDTO datos) {
+        Proveedor proveedor = new Proveedor();
+        copiarDatos(datos, proveedor);
+        return DtoMapper.toResponse(repository.save(proveedor));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> actualizar(
+    public ResponseEntity<ProveedorResponseDTO> actualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody Proveedor datos) {
+            @Valid @RequestBody ProveedorRequestDTO datos) {
         return repository.findById(id).map(proveedor -> {
-            proveedor.setNombre(datos.getNombre());
-            proveedor.setTelefono(datos.getTelefono());
-            proveedor.setCorreo(datos.getCorreo());
-            proveedor.setActivo(datos.isActivo());
-            return ResponseEntity.ok(repository.save(proveedor));
+            copiarDatos(datos, proveedor);
+            return ResponseEntity.ok(DtoMapper.toResponse(repository.save(proveedor)));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -62,5 +67,12 @@ public class ProveedorController {
         }
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void copiarDatos(ProveedorRequestDTO datos, Proveedor proveedor) {
+        proveedor.setNombre(datos.getNombre());
+        proveedor.setTelefono(datos.getTelefono());
+        proveedor.setCorreo(datos.getCorreo());
+        proveedor.setActivo(datos.isActivo());
     }
 }
