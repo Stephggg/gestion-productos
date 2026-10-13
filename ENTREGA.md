@@ -1,4 +1,59 @@
-# Practica: Persistencia y relaciones con Spring Data JPA
+# Practica: Persistencia, relaciones y seguridad JWT
+
+## Practica guiada 9: Seguridad con Spring Security y JWT
+
+La API usa Spring Security como resource server JWT. El login emite tokens HS256
+con una vigencia de 30 minutos y el secreto se obtiene exclusivamente de la
+variable de entorno `JWT_SECRET_BASE64`.
+
+### Usuarios de laboratorio
+
+| Usuario | Contrasena | Rol |
+|---|---|---|
+| `admin` | `Admin123!` | ADMIN |
+| `operador` | `Operador123!` | USER |
+
+Estas credenciales son solo para desarrollo. No se deben usar en produccion.
+
+### Seguridad de endpoints
+
+| Metodo | Ruta | Acceso |
+|---|---|---|
+| GET | `/api/publico/saludo` | Publico |
+| POST | `/api/auth/login` | Publico |
+| GET | `/api/auth/perfil` | USER o ADMIN |
+| GET | `/api/productos/**` | USER o ADMIN |
+| POST, PUT, DELETE | `/api/productos/**` | ADMIN |
+| GET | `/api/categorias/**` | USER o ADMIN |
+| POST, PUT, DELETE | `/api/categorias/**` | ADMIN |
+
+Una solicitud sin token o con token invalido devuelve `401 Unauthorized`. Un
+usuario autenticado sin el rol requerido devuelve `403 Forbidden`.
+
+### Configuracion local
+
+Genera una clave aleatoria de 32 bytes y configura su resultado Base64 como
+`JWT_SECRET_BASE64` en la configuracion de ejecucion de IntelliJ. Nunca guardes
+la clave, un JWT vigente ni contrasenas reales en Git.
+
+La coleccion reproducible de Postman esta en
+`capturasPostman/NicaMarket-JWT.postman_collection.json`. Incluye login de USER
+y ADMIN, pruebas de `401`, `403`, consultas autorizadas y el endpoint de perfil.
+
+### Evidencias requeridas
+
+Ejecutar la coleccion con la aplicacion iniciada y guardar al menos estas cinco
+respuestas en Postman:
+
+1. Saludo publico: `200`.
+2. Login de operador: `200` y JWT.
+3. Consulta de categorias con USER: `200`.
+4. Creacion de categoria con USER: `403`.
+5. Consulta protegida sin token: `401`.
+
+Tambien se incluye una prueba de creacion con ADMIN y de token invalido para
+completar la comprobacion del reto. Las capturas deben mostrar el codigo HTTP,
+la URL y una breve explicacion de autenticacion o autorizacion.
 
 ## Estructura
 
