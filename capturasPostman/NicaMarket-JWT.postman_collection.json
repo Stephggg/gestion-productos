@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "NicaMarket - JWT",
+    "description": "Evidencias de autenticacion JWT y autorizacion por roles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "tokenUser", "value": "" },
+    { "key": "tokenAdmin", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Saludo publico (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/publico/saludo",
+        "description": "No requiere autenticacion. Evidencia de endpoint publico."
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 200', function () { pm.response.to.have.status(200); });"] } }]
+    },
+    {
+      "name": "2 - Login USER (200 + JWT)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"operador\",\n  \"password\": \"Operador123!\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login",
+        "description": "Autentica al operador y guarda su JWT para las pruebas siguientes."
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 200', function () { pm.response.to.have.status(200); });", "pm.test('Incluye token', function () { pm.expect(pm.response.json().token).to.be.a('string').and.not.empty; });", "pm.collectionVariables.set('tokenUser', pm.response.json().token);"] } }]
+    },
+    {
+      "name": "3 - Categorias con USER (200)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenUser}}" }],
+        "url": "{{baseUrl}}/api/categorias",
+        "description": "USER puede consultar categorias."
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 200', function () { pm.response.to.have.status(200); });"] } }]
+    },
+    {
+      "name": "4 - Crear categoria con USER (403)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenUser}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Categoria USER no permitida\",\n  \"activa\": true\n}" },
+        "url": "{{baseUrl}}/api/categorias",
+        "description": "USER esta autenticado, pero no tiene permiso de escritura."
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 403', function () { pm.response.to.have.status(403); });"] } }]
+    },
+    {
+      "name": "5 - Productos sin token (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/productos",
+        "description": "Recurso protegido sin autenticacion."
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 401', function () { pm.response.to.have.status(401); });"] } }]
+    },
+    {
+      "name": "6 - Login ADMIN (200 + JWT)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin123!\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 200', function () { pm.response.to.have.status(200); });", "pm.collectionVariables.set('tokenAdmin', pm.response.json().token);"] } }]
+    },
+    {
+      "name": "7 - Perfil autenticado (200)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+        "url": "{{baseUrl}}/api/auth/perfil"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 200', function () { pm.response.to.have.status(200); });", "pm.test('Incluye usuario', function () { pm.expect(pm.response.json().username).to.eql('admin'); });"] } }]
+    },
+    {
+      "name": "8 - Crear categoria con ADMIN (2xx)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{adminCategoryName}}\",\n  \"activa\": true\n}" },
+        "url": "{{baseUrl}}/api/categorias",
+        "description": "ADMIN puede crear categorias cuando los datos son validos."
+      },
+      "event": [
+        { "listen": "prerequest", "script": { "exec": ["pm.variables.set('adminCategoryName', 'Categoria ADMIN ' + Date.now());"] } },
+        { "listen": "test", "script": { "exec": ["pm.test('Respuesta exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });"] } }
+      ]
+    },
+    {
+      "name": "9 - Token invalido (401)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer token.invalido" }],
+        "url": "{{baseUrl}}/api/categorias"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Respuesta 401', function () { pm.response.to.have.status(401); });"] } }]
+    }
+  ]
+}
